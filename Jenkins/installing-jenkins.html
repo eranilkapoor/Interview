@@ -1,0 +1,29 @@
+Installing Jenkins :-
+
+	Prerequisites :-
+		1. Minimum 256 MB of RAM 1 GB of Hard disk.
+		2. Recommended 1 GB of RAM 50 GB of Hard disk.
+		3. Software requirements JAVA & Web Browser.
+
+	Installation platforms :-
+		1. Docker
+		2. WAR file
+		3. macOS
+		4. Linux
+		5. Windows
+		6. Other operating systems 
+
+===============Installing Jenkins on AWS EC2 Machine===============
+Steps :-
+	1. Connect to your EC2 Linux machine
+	2. Update packages : sudo apt-get update
+	3. Install or update java on the EC2 machine : java -version
+	4. Download latest jenkins & add key : wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+	5. Add key with etc source list : sudo sh -c 'echo deb https://pkg.jenkins.io/debian binary/ > /etc/apt/sources.list.d/jenkins.list'
+	6. Update package again : sudo apt-get update
+  	7. Install jenkins : sudo apt-get install jenkins
+  	8. Start jenkins : sudo systemctl start jenkins
+  	9. Check jenkins status : sudo systemctl status jenkins
+  	10. Go to web browser to setup jenkins like : http://<public ip>:8080
+  	11. Copy and paste the instrunction password and install the plugins.
+  	12. Start using the jenkins.

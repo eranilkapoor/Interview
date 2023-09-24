@@ -1,0 +1,52 @@
+Dokerfile syntax consist of two kind of main blocks
+	1. Comments
+	2. Commands + arguments
+
+# Line blocks used for commenting
+
+Example :-
+
+# Print "Welcome To Webnza!"
+
+RUN echo "Welcome To Webnza!"
+
+
+===============================
+Following are the commands used in docker
+
+1. FROM :- FROM directive is probably the most crucial amongst all others for Dockerfiles. It defines the base image to use to start the build process
+
+E.g :- FROM ubuntu
+
+2. RUN :- 
+
+E.g :- RUN apt-get install -y riak
+
+3. CMD :-
+
+E.g :- CMD echo "Welcome To Webnza!"
+
+4. ENTRYPOINT :-
+
+5. ADD :-
+
+6. ENV :-
+
+7. WORKDIR :-
+
+8. EXPOSE :-
+
+9. MAINTAINER :-
+
+10. USER :-
+
+11. VOLUME :- 
+
+=========================
+How to create docker image from Dockerfile 
+	1. Run the command : docker build -t <image name> <path of the Dockerfile>
+
+How to run docker image 
+	1. Run the command : docker run -it <image id>
+
+		

@@ -1,0 +1,24 @@
+https://sixergame.com/#/
+
+Sixer Player Performance Scoring, Powered by CricViz
+----------------------------------------------------
+
+The goal of the Sixer Scoring System is to be able to value a player accurately based on their past, and current (in-match) performance. Our scoring system does not just look at a scorecard and give a player points, it looks to understand the match dynamics and value a player based on their expectation in that match’s situation.
+
+The score has 4 parts
+1) Batting Score
+2) Bowling Score
+3) Fielding Score
+4) Total Score Calculation
+
+The score is calculated at a ball level and compares the player’s performance in each skill, to the expectation at that time. There are two different systems for white ball cricket (ODIs and T20 and red ball cricket (Tests). All expectations are for each over, and match situation (wickets lost) and need to be adjusted for the ground and the opposition of a specific match. This makes sure that the expectation for runs and wickets are specifically tailored for that match. The score is only calculated for the allotted quota of overs in white-ball formats, which excludes Super Overs.
+
+Please read the details carefully to best understand how this system works. Please see the Appendix in the end for all the data points that are required.
+
+ODI and T20 Scoring System:
+Batting Score:
+Batting Score = (Runs Scored – Expected Runs) + Wicket value points + (Bat Replacement Level * Balls Faced) + Shift
+Expected Runs = Sum of (balls faced by batsman in each over * expected runs in that over * Ground Runs Factor and Opposition Batting Runs Factor)
+Wicket Value Points = Sum of (Wickets Involved – (Wickets Expected * Opposition Bat Run Factor * Ground Runs) * (Over Wicket Value * Ground Runs * Opposition Bat Run Factor)
+
+A batsman gets points for not getting out, and loses points for getting out.The value of a batsman’s wicket depends on which over they are batting in, and how many wickets has their team lost, and of course, which formatthe game is in.

@@ -1,0 +1,31 @@
+Docker Swarm :- Docker Swarm is a technique to create and maintain a cluster of Docker Engines. Service deployed in any node can be accessed on other nodes in the same cluster.
+
+Docker swarm is a cluster of machine, all running docker which provides scalable and reliable platform to run many containers.
+
+With swarm, IT adminstrators and developers can establish and manage a cluster of Docker nodes as a single virtual system.
+
+Every swarm has al least one manager (Generally the one which is initialized first) and has many worker nodes under it.
+
+Features :-
+
+1. High Availablity of Services
+2. Auto load-balancing
+3. Decentralized access
+4. Easy to Scale-up deployments
+5. Rolling updates
+
+Docker Swarm Commands :-
+
+Initialize the swarm 	>> doker swarm init --advertise-addr <ip-addr>
+						>> docker swarm join
+						>> docker swarm join-token
+						>> docker swarm leave
+List Services 			>> docker service ls
+List task of services 	>> docker service ps <name>
+Create new Service 		>> docker service create <name> <image-name>
+Remove service 			>> docker service rm <name>
+Scale Services 			>> docker service scale <name>=5
+
+List the nodes.         >> docker node ls
+List services in nodes  >> docker node ps
+Remove node 			>> docker node rm <id>

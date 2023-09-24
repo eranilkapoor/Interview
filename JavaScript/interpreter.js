@@ -1,0 +1,3 @@
+/*
+	JavaScript is a interpreted language which is interpreded by it as a byte code 
+*/

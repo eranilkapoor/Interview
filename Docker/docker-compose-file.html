@@ -1,0 +1,29 @@
+>> docker-compose file saved as "docker-compose.yml"
+
+
+version: "3.8" # specify docker-compose version
+
+#Define the services/containers to be run
+services:
+  	angular: #name of the first service
+    	build: angular-app #specify the directory of the Dockerfile
+    	ports:
+    		- "4200:4200" #specify port mapping
+
+    express: #name of the second service
+    	build: express-server #specify the directory of the Dockerfile
+    	ports:
+    		- "3000:3000" #specify port mapping
+    	links:
+    		- database #link this service to the database service
+
+    database: #name of third service
+    	image: mongo #specify image to build container from
+    	ports:
+    		- "27017:27017" #specify port mapping
+      		
+
+==============================
+Now "docker-compose build" command will build the image from that docker-compose.yml file.
+
+ANd "docker-compose up" command will run the conatiners of that images
