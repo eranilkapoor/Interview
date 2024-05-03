@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test 1</title>
+        <style>
+            html, body {
+                padding: 0;
+                margin: 0;
+                height: 100%;
+            }
+
+            body > div {
+                float: left;
+                width: 50%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                align-content: center;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            body > div:nth-child(1) {
+                background-color: #2d2d2d;
+            }
+            body > div:nth-child(2) {
+                background-color: #DDD;
+            }
+
+            button {
+                cursor: pointer;
+                width: 120px;
+                height: 50px;
+                font-size: 26px;
+                font-family: 'Alegreya Sans SC', sans-serif;
+                display: block;
+                margin: 20px;
+                transition: all 0.3s;
+            }
+
+            button:hover {
+                transition: all 0.2s;
+            }
+
+            button:focus {
+                outline: none;
+            }
+
+            button:active {
+                transition: none; /* So when you tap, effect is instant */
+                padding: 0; /* Firefox adds padding because it's a special sausage */
+            }
+
+            body > div:nth-child(1) > button:nth-child(1) {
+                background-color: rgba(0,0,0,0);
+                color: white; 
+                border: 2px solid white;
+                border-radius: 5px;
+            }
+
+            body > div:nth-child(1) > button:nth-child(1):hover {
+                background: white;
+                color: #2d2d2d;
+                box-shadow: 0 2px 9px 2px rgba(0,0,0,0.6),
+                            0 1px 9px rgba(0,0,0,0.4) inset;
+            }
+
+            body > div:nth-child(1) > button:nth-child(1):active {
+                transform: scale(0.94);
+            }
+
+            body > div:nth-child(1) > button:nth-child(2) {
+                color: #1cb;
+                background-color: white;
+                border: 5px solid rgba(0,0,0,0);
+                border-radius: 50%;
+                transition: all 0.3s;
+            }
+
+            body > div:nth-child(1) > button:nth-child(2):hover {
+                box-shadow: 0 0 15px rgba(0,0,0,0.8) inset 0 2px 6px 1px rgba(0,0,0,0.5);
+                height: 120px;
+                margin: -15px 20px; /* Was 20. Stops layout changing */
+                background: radial-gradient(
+                                #2d2d2d 0%,
+                                #2d2d2d 5%,
+                                transparent 6%
+                            ),
+                            radial-gradient(
+                                #2d2d2d 0%,
+                                #2d2d2d 5%,
+                                transparent 6%
+                            ),
+                            radial-gradient(
+                                #2d2d2d 0%,
+                                #2d2d2d 5%,
+                                transparent 6%
+                            ),
+                            radial-gradient(
+                                #2d2d2d 0%,
+                                #2d2d2d 5%,
+                                transparent 6%
+                            ),
+                            white;
+                background-position: -9px -9px,
+                                    -9px  9px,
+                                        9px -9px,
+                                        9px  9px;
+                }
+
+                body > div:nth-child(1) > button:nth-child(2):active {
+                transform: rotate(360deg);
+                transition: none;
+                }
+
+                body > div:nth-child(1) > button:nth-child(3) {
+                background-color: rgba(0,0,0,0);
+                border: 3px solid white;
+                border-radius: 5px;
+                background: linear-gradient(to bottom right, #3acfd5 0%, #3a4ed5 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                border-image: linear-gradient(to bottom right, #3acfd5 0%, #3a4ed5 100%);
+
+                    border-image-slice: 1;
+                }
+
+                body > div:nth-child(1) > button:nth-child(3):hover {
+                }
+
+                body > div:nth-child(1) > button:nth-child(4) {
+                background-color: transparent;
+                color: #fff;
+                border: 1px solid #aaa;
+                }
+
+                body > div:nth-child(1) > button:nth-child(4):hover {
+                color: #fff;
+                border: 1px solid #fff;
+                }
+
+                body > div:nth-child(1) > button:nth-child(4):active {
+                border: 1px solid #fff120;
+                }
+
+                body > div:nth-child(2) > button {
+                color: white;
+                }
+
+                body > div:nth-child(2) > button:nth-child(1) {
+                background-color: #da4f49;
+                border: none;
+                border-radius: 8px;
+                box-shadow: 0 4px 0 rgba(0,0,0,0.25),
+                            0 4px 0 rgba(218,79,73,1),
+                            0 4px 6px rgba(0,0,0,0.45);
+                }
+
+                body > div:nth-child(2) > button:nth-child(1):hover {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.45);
+                transform: translateY(4px);
+                }
+
+                body > div:nth-child(2) > button:nth-child(1):active {
+                background-color: #d14141;
+                }
+
+                body > div:nth-child(2) > button:nth-child(2) {
+                border: 2px solid white;
+                background-color: lightGreen;
+                box-shadow: 0 0 4px rgba(0,0,0,0.2) inset,
+                            0 1px 5px rgba(0,0,0,0.2);
+                text-shadow: 0 0 9px rgba(0,0,0,0.3);
+                }
+
+                body > div:nth-child(2) > button:nth-child(2):hover {
+                transform: rotate(-4deg);
+                }
+
+                body > div:nth-child(2) > button:nth-child(2):active {
+                transform: scale(0.9, 0.9);
+                }
+
+                body > div:nth-child(2) > button:nth-child(3) {
+                border: none;
+                background-color: white;
+                box-shadow: 0 1px 9px rgba(0,0,0,0.1),
+                            0 0 0 100px #1cb inset;
+                transform: skewX(-18deg);
+                transition: none;
+                }
+
+                body > div:nth-child(2) > button:nth-child(3):hover {
+                box-shadow: 0 3px 20px rgba(0,0,0,0.3),
+                            0 0 0 2px white inset;
+                background-color: #1cb;
+                transition: all 0.2s;
+                }
+
+                body > div:nth-child(2) > button:nth-child(3):active {
+                color: #1cb;
+                box-shadow: 0 3px 20px rgba(0,0,0,0.3),
+                            0 0 0px 200px white inset;
+                transition: none;
+                }
+
+                body > div:nth-child(2) > button:nth-child(4) {
+                background-color: white;
+                border: 1px solid white;
+                border-radius: 50px;
+                color: #7525c1;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                transition: color 0.3s, box-shadow 0.6s, transform 0.3s;
+                }
+
+                body > div:nth-child(2) > button:nth-child(4):hover {
+                box-shadow: 0 2px 11px rgba(0,0,0,0.2);
+                }
+
+                body > div:nth-child(2) > button:nth-child(4):active {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.2),
+                            0 2px 6px rgba(0,0,0,0.2) inset;
+                transition: none;
+                color: #8229d6;
+                }
+        </style>
+    </head>
+    <body>
+        <div>
+            <button>Thick</button>
+            <button>Button</button>
+            <button>Blue</button>
+            <button>Thin</button>
+          </div>
+          <div>
+            <button>Push</button>
+            <button>Slant</button>
+            <button>Flash</button>
+            <button>Round</button>
+          </div>
+    </body>
+</html>

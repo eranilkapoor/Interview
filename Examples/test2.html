@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test 2</title>
+        <style>
+            body{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:0;
+  background: #f5f5f5;
+}
+section{
+  width:560px;
+  display:flex;
+  justify-content:space-between;
+}
+button{
+  font-size:28px;
+  border:none;
+  padding:16px 40px 16px 40px;
+  border-radius:5px;
+    box-shadow:0px 10px 0px 0px #1d7f8a, 
+      0px 0px 10px 0px rgba(120, 120, 120, 0.4);
+  color:white;
+  background:#239dab;
+  cursor:pointer;
+  transition:all 0.16s;
+  position:relative;
+  top:0;
+}
+button:focus{
+  outline:none;
+}
+button:active{
+  box-shadow: 0px 5px 0px 0px #1d7f8a;
+  top:5px;
+}
+
+.loading-button.red{
+  background:#d03651;
+  box-shadow:0px 10px 0px 0px #a72b41,
+    0px 0px 10px 0px rgba(120, 120, 120, 0.4);;
+}
+
+.loading-button.red:active{
+  box-shadow: 0px 5px 0px 0px #a72b41;
+}
+
+.loading-button.green{
+  background:#61a74b;
+  box-shadow:0px 10px 0px 0px #4e883c,
+    0px 0px 10px 0px rgba(120, 120, 120, 0.4);;
+}
+
+.loading-button.green:active{
+  box-shadow: 0px 5px 0px 0px #4e883c;
+}
+        </style>
+    </head>
+    <body>
+        <section>
+            <button class="red loading-button">Cancel</button>
+            <button class="loading-button">Okay</button>
+            <button class="green loading-button">Send</button>
+        </section>
+    </body>
+</html>
