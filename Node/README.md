@@ -13,6 +13,8 @@ This folder is a focused Node interview-preparation guide. Each topic has techno
 - [Debugger](./debugger.md)
 - [Dgram](./dgram.md)
 - [Error Handlings](./error-handlings.md)
+- [Express.js Framework](./express-js-framework.md)
+- [Express Routing, Middleware, and Error Handling](./express-routing-middleware-error-handling.md)
 - [Event Loop](./event-loop.md)
 - [Events](./events.md)
 - [File Systems](./file-systems.md)
@@ -20,6 +22,8 @@ This folder is a focused Node interview-preparation guide. Each topic has techno
 - [HTTP](./http.md)
 - [HTTPS](./https.md)
 - [Non Blocking](./non-blocking.md)
+- [NestJS Framework](./nest-js-framework.md)
+- [NestJS Modules, Guards, Pipes, and Interceptors](./nest-js-modules-guards-pipes-interceptors.md)
 - [Package Json](./package-json.md)
 - [Process And Os](./process-and-os.md)
 - [Releases](./releases.md)
@@ -49,6 +53,9 @@ A: Be honest, then reason from related experience. Explain the problem the topic
 
 **Q: What should every practical answer include?**  
 A: A concrete example, the main tradeoff, one common mistake, and a way to test or monitor the behavior.
+
+**Q: What Node frameworks should senior backend candidates prepare?**  
+A: Express.js and NestJS are the most common. Express tests middleware, routing, async error handling, and API structure. NestJS tests TypeScript-first architecture, modules, providers, dependency injection, guards, pipes, interceptors, and enterprise backend design.
 
 ## How to Use This Folder
 
