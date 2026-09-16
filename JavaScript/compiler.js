@@ -1,7 +1,0 @@
-/*
-	Compiler is a engine which compile the code into optimized byte code or machine code so computer can understand it.
-
-	Babel is a javascript compiler 
-
-	JIT or Just In Time Compiler also compile the javascript
-*/

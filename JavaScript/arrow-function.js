@@ -1,4 +1,0 @@
-/*
-	Arrow function is the sort declarations of function.
-
-*/

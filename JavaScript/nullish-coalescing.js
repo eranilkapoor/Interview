@@ -1,3 +1,0 @@
-/*
-	Nullish Coalescing
-*/

@@ -1,3 +1,0 @@
-/*
-	Job Queue or microtask queue is the part of javaScript Runtime all the job queue or micotask queue is executed before the callback queue.
-*/
