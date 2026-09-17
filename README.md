@@ -12,8 +12,8 @@ Each folder below is self-contained: open its `README.md` for a table of content
 | [TypeScript](./TypeScript/README.md) | 46 | Types, interfaces, generics, advanced types, tooling |
 | [React](./React/README.md) | 48 | Components, hooks, patterns, performance, Redux, routing, testing |
 | [React Native](./React%20Native/README.md) | 33 | Mobile-specific: native architecture, navigation, device APIs, performance, release |
-| [Angular](./Angular/README.md) | 31 | Components, data binding, DI, RxJS, forms, routing, rendering |
-| [Node](./Node/README.md) | 35 | Runtime internals, streams, concurrency, security, Express, NestJS |
+| [Angular](./Angular/README.md) | 32 | Components, data binding, DI, RxJS, forms, routing, rendering, testing |
+| [Node](./Node/README.md) | 38 | Runtime internals, streams, concurrency, security, performance, Express, NestJS |
 | [AWS](./AWS/README.md) | 32 | Compute, storage, databases, networking, security, serverless, cost, architecture |
 | [Docker](./Docker/README.md) | 22 | Images, Dockerfiles, Compose, networking, volumes, orchestration, production |
 | [Kubernetes](./Kubernetes/README.md) | 11 | Core objects, networking, config/storage, scaling, Helm, troubleshooting |
@@ -24,11 +24,11 @@ Each folder below is self-contained: open its `README.md` for a table of content
 | [MySQL](./MySQL/README.md) | 10 | Schema design, joins, indexing, normalization, transactions, optimization |
 | [Redis](./Redis/README.md) | 10 | Data structures, persistence, pub/sub, streams, caching patterns, clustering |
 | [Data Structure](./Data%20Structure/README.md) | 22 | Complexity analysis, linear structures, trees, graphs, DP, sorting/searching |
-| [System Design & Technical Architect](./System%20Design%20%26%20Technical%20Architect/README.md) | 26 | Scalability, caching, distributed systems, architecture reviews, real system designs |
+| [System Design & Technical Architect](./System%20Design%20%26%20Technical%20Architect/README.md) | 27 | Scalability, caching, distributed systems, message queues/Kafka, architecture reviews, real system designs |
 | [AI GenAI](./AI%20GenAI/README.md) | 15 | LLM fundamentals, RAG, embeddings, fine-tuning, evaluation, LLMOps |
 | [General Topics](./General%20Topics/README.md) | 9 | Behavioral, HR, managerial, and role-specific interview rounds |
 
-That's roughly **510 topic files** across 19 technology folders.
+That's roughly **515 topic files** across 19 technology folders.
 
 ## How to Use This Repo
 

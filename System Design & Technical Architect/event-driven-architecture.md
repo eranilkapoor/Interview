@@ -32,3 +32,8 @@ A: Design consumers to be idempotent, use unique event IDs, deduplication tables
 **Q: What is a dead-letter queue?**  
 A: A place for messages that cannot be processed after retries. It helps inspect failures without blocking the main queue.
 
+## Related Topics
+- [Message Queues and Kafka](./message-queues-and-kafka.md)
+- [Microservices Architecture](./microservices-architecture.md)
+- [Distributed Systems Concepts](./distributed-systems-concepts.md)
+

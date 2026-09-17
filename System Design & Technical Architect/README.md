@@ -14,6 +14,7 @@ This folder prepares you for senior system design and technical architect interv
 - [API Design and Integration](./api-design-and-integration.md)
 - [Microservices Architecture](./microservices-architecture.md)
 - [Event-Driven Architecture](./event-driven-architecture.md)
+- [Message Queues and Kafka](./message-queues-and-kafka.md)
 - [Distributed Systems Concepts](./distributed-systems-concepts.md)
 - [Consistency, Availability, and CAP Theorem](./consistency-availability-cap-theorem.md)
 - [Security Architecture](./security-architecture.md)

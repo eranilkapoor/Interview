@@ -40,6 +40,7 @@ This folder is a focused knowledge base for studying and teaching Node.js for in
 ### Security & Crypto
 - [Crypto](./crypto.md)
 - [Security](./security.md)
+- [Authentication and Authorization](./authentication-and-authorization.md)
 
 ### Debugging, Testing & Tooling
 - [Debugger](./debugger.md)
@@ -47,6 +48,10 @@ This folder is a focused knowledge base for studying and teaching Node.js for in
 - [Unit Tests](./unit-tests.md)
 - [Util](./util.md)
 - [TTY](./tty.md)
+
+### Performance & Memory
+- [Performance Optimization](./performance-optimization.md)
+- [Memory Leaks](./memory-leaks.md)
 
 ### Frameworks: Express & NestJS
 - [Express.js Framework](./express-js-framework.md)
@@ -123,6 +128,7 @@ The `exports` field explicitly defines which files/subpaths a package exposes to
 3. **Networking** after that — HTTP/HTTPS/TLS/URL are where most backend interview questions live, and they depend on streams and the event loop being solid first.
 4. **Concurrency: Cluster & Worker Threads** and **Security & Crypto** are more advanced/systems-level — comfortable footing in the event loop and streams makes these much easier to reason about.
 5. **Debugging, Testing & Tooling** rounds out production-readiness — useful throughout, but especially once you're already writing real code against the topics above.
-6. **Frameworks: Express & NestJS** last — both assume you already understand HTTP, middleware-style request handling, and async error handling from the core topics.
+6. **Performance & Memory** next — diagnosing slow endpoints and memory leaks builds directly on the event loop, streams, and profiling tools covered earlier.
+7. **Frameworks: Express & NestJS** last — both assume you already understand HTTP, middleware-style request handling, and async error handling from the core topics.
 
 For interview prep specifically: skim each file's own "Interview Questions & Answers" section for quick per-topic review, then use the "Curated" list above as a cross-cutting mock-interview pass once the individual topics feel solid.

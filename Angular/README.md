@@ -51,6 +51,9 @@ This folder is a personal knowledge base for studying and teaching Angular, buil
 - [Service Workers](./service-workers.md)
 - [Web Workers](./web-workers.md)
 
+### Testing
+- [Testing Angular Applications](./testing-angular-applications.md)
+
 ## Interview Questions & Answers — Curated
 
 **1. Explain Angular's change detection and the `OnPush` strategy. (Advanced)**
@@ -123,6 +126,7 @@ Work through the sections roughly in the order listed above:
 4. **Dependency Injection & Services** next — DI, providers, and services are largely independent of the template-layer material and are best understood together as one system (the injector hierarchy).
 5. **Forms** and **Routing & Lazy Loading** after that — both assume a solid grasp of components, binding, and DI, and are consistently deep-dive territory in mid/senior interviews.
 6. **RxJS & Observables** — read alongside or just after Forms/Routing, since `valueChanges`, `HttpClient`, and Router events are all Observable-based and this is where most Angular-specific async questions concentrate.
-7. **Rendering: SSR, Service Workers, Web Workers** last — these are the most specialized/systems-level topics, and understanding them well benefits from already being comfortable with components, DI, and RxJS.
+7. **Rendering: SSR, Service Workers, Web Workers** next — these are the most specialized/systems-level topics, and understanding them well benefits from already being comfortable with components, DI, and RxJS.
+8. **Testing** last — writing effective tests draws on components, DI, and HTTP/RxJS all at once, so it's easiest once those feel solid.
 
 For interview prep specifically: skim each topic file's "Interview Questions & Answers" section first for a quick per-topic refresher, then use the "Curated" list above as a cross-cutting mock-interview pass once the individual topics feel solid.
