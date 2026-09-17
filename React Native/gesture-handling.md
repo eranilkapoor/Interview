@@ -149,7 +149,7 @@ A: Gesture Handler is responsible for recognizing and classifying gestures nativ
 
 ## Related Topics
 - [animations.md](./animations.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [core-components.md](./core-components.md)
 - [../React/handling-events.md](../React/handling-events.md)
 - [../React/use-ref.md](../React/use-ref.md)

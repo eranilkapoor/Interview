@@ -75,5 +75,5 @@ A: JSI is the low-level foundation both are built on. A TurboModule is essential
 - [react-native-architecture.md](./react-native-architecture.md)
 - [hermes-engine.md](./hermes-engine.md)
 - [native-modules.md](./native-modules.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [introduction-to-react-native.md](./introduction-to-react-native.md)

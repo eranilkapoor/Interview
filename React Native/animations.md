@@ -118,7 +118,7 @@ A: A JavaScript function specially marked (automatically, via the Babel plugin, 
 
 ## Related Topics
 - [gesture-handling.md](./gesture-handling.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [hermes-engine.md](./hermes-engine.md)
 - [react-native-architecture.md](./react-native-architecture.md)
 - [../React/use-ref.md](../React/use-ref.md)

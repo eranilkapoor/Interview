@@ -82,6 +82,6 @@ A: Hermes isn't strictly required â€” JSI can be implemented by other engines â€
 ## Related Topics
 - [javascript-bridge-and-jsi.md](./javascript-bridge-and-jsi.md)
 - [react-native-architecture.md](./react-native-architecture.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [debugging-react-native-apps.md](./debugging-react-native-apps.md)
-- [building-and-releasing-apps.md](./building-and-releasing-apps.md)
+- [building-and-release.md](./building-and-release.md)

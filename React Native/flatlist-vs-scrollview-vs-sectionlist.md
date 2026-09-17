@@ -130,7 +130,7 @@ A: `FlatList` (like `React.memo`-based components generally) relies on reference
 
 ## Related Topics
 - [core-components.md](./core-components.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [styling-in-react-native.md](./styling-in-react-native.md)
 - [../React/rendering-lists-and-keys.md](../React/rendering-lists-and-keys.md)
 - [../React/react-performance-optimization.md](../React/react-performance-optimization.md)

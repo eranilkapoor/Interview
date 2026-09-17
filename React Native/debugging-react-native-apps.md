@@ -81,7 +81,7 @@ A: It worked by running your app's JS in Chrome's V8 engine on the desktop inste
 A: Not necessarily immediately, but it shouldn't be ignored either — warnings often flag real problems (a missing key in a list, a deprecated API, an unhandled promise rejection) that don't crash the app today but indicate fragile code or a future breaking change. The right move is to triage: fix what's addressable, and only suppress via `LogBox.ignoreLogs` with a specific message match (never a blanket ignore) for warnings that are confirmed noise, with a comment explaining why.
 
 ## Related Topics
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [hermes-engine.md](./hermes-engine.md)
 - [testing-react-native-apps.md](./testing-react-native-apps.md)
 - [native-modules.md](./native-modules.md)

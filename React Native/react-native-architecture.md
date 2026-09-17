@@ -92,6 +92,6 @@ A: Codegen statically analyzes TypeScript/Flow type definitions for native modul
 - [javascript-bridge-and-jsi.md](./javascript-bridge-and-jsi.md)
 - [hermes-engine.md](./hermes-engine.md)
 - [native-modules.md](./native-modules.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [introduction-to-react-native.md](./introduction-to-react-native.md)
 - [../React/virtual-dom-and-reconciliation.md](../React/virtual-dom-and-reconciliation.md)

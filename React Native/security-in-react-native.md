@@ -1,63 +1,134 @@
-﻿# Security In React Native
+# Security in React Native
 
-Security In React Native is an important React Native interview topic because it tests whether you understand both the concept and the practical tradeoffs behind using it in production. Interviewers usually want more than a definition: they want to hear when you would use it, what can go wrong, how it behaves under load or edge cases, and how it connects to the rest of the stack.
+Mobile app security has a different threat model from a typical web backend: the attacker has the entire app binary in their hands, can run it on a device they fully control (including rooted/jailbroken devices, emulators, and debuggers), and has effectively unlimited time to inspect it offline. Nothing shipped inside the app bundle — JS source, bytecode, native binaries, embedded config — can be treated as secret in the way a server-side environment variable can, because "secret" implies the attacker can't read it, and on a device the attacker owns, they eventually can. Good React Native security practice isn't about making the app bundle unreadable (impossible); it's about making sure the *actual* secrets — user credentials, session tokens, API keys with real privileges — never live in a place the attacker can extract them from, and about raising the cost of tampering and reverse engineering as a defense-in-depth layer, not a guarantee.
 
-In day-to-day engineering, Security In React Native matters because small design choices around it affect readability, reliability, performance, debugging, deployment, and team maintainability. A strong answer should explain the mental model first, then show how the concept appears in real systems, and finally mention the limitations or failure modes that experienced developers watch for.
+**Secure storage** is the first concrete line of defense: tokens, credentials, and any sensitive session data should go through `react-native-keychain`, which wraps the iOS Keychain and Android Keystore — both OS-level, hardware-backed (on supported devices) encrypted stores designed specifically for credential storage, optionally gated behind biometric authentication (Face ID/Touch ID, fingerprint) via `accessControl` options. This is explicitly *not* what `AsyncStorage` is for — AsyncStorage persists data as plaintext files on disk with no encryption at all (see `async-storage.md`), so an auth token written with `AsyncStorage.setItem` is readable by anyone with file-system access to the device (trivial on a rooted/jailbroken device, and achievable via backup extraction tools even on some non-rooted ones). The distinction interviewers look for: AsyncStorage is for non-sensitive app state (preferences, cached UI data); Keychain/Keystore-backed storage is for anything that would be damaging if read by an attacker.
 
-For interviews, frame Security In React Native around four things: the problem it solves, the normal implementation path, the tradeoffs compared with nearby alternatives, and the signals you would monitor in production. That structure works well whether the topic is a framework feature, a runtime API, a cloud service, a database concept, or a DevOps workflow.
+**Certificate/SSL pinning** defends against a specific attack: a man-in-the-middle intercepting HTTPS traffic using a rogue or compromised CA certificate (something that becomes plausible on a compromised device with a malicious root cert installed, or on a network with a corporate/attacker-controlled proxy). Normal TLS validates that the server's certificate chains up to *any* trusted CA; pinning goes further and validates that the certificate (or its public key) matches a specific, hardcoded expected value baked into the app, so even a technically-valid-but-untrusted-for-this-purpose certificate is rejected. This is implemented via libraries like `react-native-ssl-pinning` or `TrustKit`(iOS)/`OkHttp` `CertificatePinner` (Android)-based native config, or increasingly via platform-level config (iOS App Transport Security exceptions, Android Network Security Config XML). The real operational cost of pinning is certificate rotation: if the pinned cert expires or is rotated server-side without an app update pinning the new one, the app can lock itself out of its own API — so pinning strategies usually pin an intermediate/CA-level cert with longer validity, or ship multiple pins (current + next), rather than pinning a single leaf certificate.
 
-When teaching this topic, start from the problem it solves, then introduce the tool or pattern, then walk through one concrete example. That sequence helps candidates avoid memorized answers and gives them a way to reason through follow-up questions. A good teaching explanation should also include at least one failure scenario, because many interview follow-ups are really asking, "What happens when this is misused?"
+**Obfuscation and Hermes bytecode** are worth being precise about in an interview: they raise the *cost* of reverse engineering, not the *possibility*. A React Native JS bundle, whether shipped as plain JS text or compiled to Hermes bytecode, is still fundamentally a program the OS has to execute on the user's own device — it can always be extracted from the app binary and disassembled/decompiled with enough effort (tools exist for both plain JS bundles and Hermes bytecode). Hermes bytecode is meaningfully harder to read than un-minified JS source (no variable names, no comments, a different representation than source-level JS), and tools like `metro`'s minifier or dedicated JS obfuscators add friction on top of that — but none of this is real security, only mild deterrence. The one true security control is: **never embed a real secret in the bundle in the first place.** An API key embedded in JS (even Hermes-compiled) that grants meaningful server-side privileges (a paid third-party service key, an admin-scoped key, etc.) should be treated as fully public and compromised; anything requiring real authorization belongs behind a backend the app talks to, not baked into client code.
+
+**Jailbreak/root detection** (via libraries like `jail-monkey`) checks device-level signals (unusual file paths, suspicious installed packages, ability to write outside the sandbox, debugger attachment) to flag that a device's security model has likely been weakened. It's useful as one signal among several — e.g., stepping up authentication requirements, declining to cache highly sensitive data locally, or logging the condition for fraud analysis in a banking app — but it is fundamentally a best-effort heuristic, not a guarantee: root/jailbreak detection can itself be bypassed by a sufficiently motivated attacker (hooking frameworks like Frida/Xposed specifically exist to intercept and spoof these checks), so it should never be the *only* thing standing between an attacker and a sensitive action.
 
 ## Examples
 
-~~~js
-# Example 1: identify the responsibility
-# In an interview, describe the input, the work being done, and the output.
-echo "Security In React Native: define the problem, the mechanism, and the result."
-~~~
+```js
+// Storing an auth token: Keychain/Keystore (correct) vs AsyncStorage (wrong)
+import * as Keychain from 'react-native-keychain';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-This demonstrates the basic interview framing: define the topic by the problem it solves, not only by the API name.
+// WRONG: plaintext on disk, readable on a rooted/jailbroken device or via backup extraction
+async function badStoreToken(token) {
+  await AsyncStorage.setItem('authToken', token);
+}
 
-~~~js
-# Example 2: compare a good and bad use case
-echo "Good use: Security In React Native improves clarity, scalability, correctness, or operations."
-echo "Bad use: Security In React Native adds complexity without solving a real requirement."
-~~~
+// CORRECT: backed by iOS Keychain / Android Keystore, OS-level encrypted,
+// optionally requiring biometric auth to read it back
+async function storeTokenSecurely(token) {
+  await Keychain.setGenericPassword('session', token, {
+    accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,
+    accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+}
 
-This demonstrates tradeoff thinking, which is often what separates junior answers from senior answers.
+async function getStoredToken() {
+  const credentials = await Keychain.getGenericPassword();
+  return credentials ? credentials.password : null; // false if nothing stored
+}
 
-~~~js
-# Example 3: production checklist
-echo "Review Security In React Native for correctness, performance, security, observability, and maintainability."
-~~~
+async function clearStoredToken() {
+  await Keychain.resetGenericPassword();
+}
+```
 
-This demonstrates how to discuss the topic in a real project context instead of as isolated trivia.
+`react-native-keychain`'s API is deliberately narrow (username/password-shaped storage) but maps directly onto the Keychain/Keystore's credential model; the `accessControl`/`accessible` options control both encryption-at-rest behavior and whether biometric confirmation is required before the value can be read back.
+
+```js
+// Certificate pinning with react-native-ssl-pinning-style config, and why
+// rotation strategy matters
+import { fetch as pinnedFetch } from 'react-native-ssl-pinning';
+
+async function callSecureApi(payload) {
+  return pinnedFetch('https://api.example.com/account', {
+    method: 'POST',
+    timeoutInterval: 10000,
+    // Pin multiple certs (current + upcoming) so a planned server-side
+    // rotation doesn't lock the already-shipped app out of its own API
+    sslPinning: {
+      certs: ['api-example-com-2026', 'api-example-com-2027-backup'],
+    },
+    body: JSON.stringify(payload),
+  }).catch((err) => {
+    // A pinning failure here likely means a MITM attempt (or a misconfigured
+    // pin after a real cert rotation) — treat it as a hard failure, not a retry
+    throw new Error(`Secure request failed pin validation: ${err.message}`);
+  });
+}
+```
+
+Pinning multiple certificates (current and next) is the standard mitigation against the biggest operational risk of pinning: a server-side certificate rotation silently breaking every already-installed copy of the app that only pinned the old cert.
+
+```jsx
+// Jailbreak/root detection as one signal feeding a step-up decision, not a hard gate
+import JailMonkey from 'jail-monkey';
+import { useEffect, useState } from 'react';
+
+function useDeviceRiskSignal() {
+  const [isCompromised, setIsCompromised] = useState(false);
+
+  useEffect(() => {
+    // isJailBroken() covers both iOS jailbreak and Android root detection
+    setIsCompromised(JailMonkey.isJailBroken());
+  }, []);
+
+  return isCompromised;
+}
+
+function SensitiveScreen() {
+  const isCompromised = useDeviceRiskSignal();
+
+  if (isCompromised) {
+    // Defense in depth: warn and restrict, but the server-side authorization
+    // check for this action must still exist independently — this is a UX/
+    // risk signal, not the actual security boundary
+    return <RiskWarningBanner message="This device appears to be rooted or jailbroken." />;
+  }
+  return <AccountDetailsScreen />;
+}
+```
+
+The detection result changes what the app *offers* to do (warn, restrict caching, require step-up auth) but the real authorization decision still has to be enforced server-side, since the check itself can be bypassed by a sufficiently motivated attacker using hooking frameworks.
 
 ## Common Pitfalls / Gotchas
 
-- Giving only a textbook definition without explaining why the topic exists.
-- Ignoring performance, security, and maintainability tradeoffs.
-- Assuming the same approach works for every project size or traffic pattern.
-- Forgetting to mention testing, debugging, and operational visibility.
-- Not connecting Security In React Native to adjacent topics in the same technology stack.
+- Storing auth tokens, refresh tokens, or any credential in `AsyncStorage` instead of `react-native-keychain` — AsyncStorage is unencrypted plaintext on disk on both platforms.
+- Hardcoding a real, privileged API key directly in JS/TS source, assuming Hermes bytecode compilation or a minifier makes it "safe" — bytecode and minification add friction, not real protection; a key embedded in the shipped bundle should be treated as public.
+- Pinning a single leaf certificate with no rotation plan — when the server's cert is renewed, every already-installed app version that pinned only the old cert breaks until users update, effectively a self-inflicted outage.
+- Relying on jailbreak/root detection (or obfuscation) as the actual security boundary for a sensitive action, instead of treating it as a soft signal — both can be bypassed (Frida/Xposed-style hooking can spoof detection results), so the real authorization check must live server-side.
+- Logging sensitive data (tokens, PII, full request/response bodies) via a console/network logging library left enabled in production builds — these logs are often readable on-device or shipped to third-party crash/analytics tools without the team realizing the payloads contain secrets.
+- Trusting client-side validation or client-enforced business rules as a security control — anything enforced only in JS running on a device the attacker controls (price checks, permission checks, feature gating) can be bypassed by patching the running app or replaying modified requests directly against the API.
 
 ## Interview Questions & Answers
 
-**Q: What is Security In React Native, and why is it useful?**  
-A: Security In React Native is a React Native concept used to solve a specific class of engineering problems. It is useful because it gives developers a repeatable mental model and implementation approach instead of relying on ad hoc decisions.
+**Q: Why shouldn't you store an auth token in AsyncStorage?**
+A: AsyncStorage persists data as unencrypted plaintext on disk on both iOS and Android — an unencrypted SQLite database on Android, flat files on iOS — so anyone with file-system access to the device (trivial on a rooted or jailbroken device, and achievable through backup-extraction tooling on some non-rooted ones) can read the token directly. `react-native-keychain` should be used instead, since it's backed by the iOS Keychain and Android Keystore, which provide OS-level, often hardware-backed encryption and can optionally require biometric authentication before the value is released.
 
-**Q: When would you use Security In React Native in a real project?**  
-A: Use it when the problem it solves is present and the added complexity is justified. A good interview answer should mention the project context, constraints, alternatives, and how you would validate that the decision worked.
+**Q: Does obfuscating or minifying the JS bundle, or compiling to Hermes bytecode, make the app secure against reverse engineering?**
+A: No — it raises the cost and difficulty of reverse engineering but doesn't make it impossible, because the bundle has to be executable on a device the attacker fully controls, and tooling exists to disassemble both plain JS bundles and Hermes bytecode. The practical implication is that no real secret (a privileged API key, hardcoded credentials, business logic that must not be tampered with) should be trusted to stay hidden inside the client bundle regardless of how it's compiled or obfuscated; genuinely sensitive operations need to be enforced server-side.
 
-**Q: What are common mistakes with Security In React Native?**  
-A: Common mistakes include overusing it, missing edge cases, treating examples as universal rules, and failing to test the behavior under realistic conditions.
+**Q: What is certificate pinning, what does it protect against, and what's the operational risk of using it?**
+A: Certificate pinning has the app validate that the server's TLS certificate (or public key) matches a specific hardcoded value, in addition to normal certificate-chain trust validation, which defends against man-in-the-middle attacks using a rogue but technically-trusted certificate — for example, on a compromised device or an attacker-controlled network proxy. The main operational risk is certificate rotation: if the server's certificate changes and the app only pinned the old one, already-installed copies of the app get locked out of the API until they're updated, which is why teams typically pin at the intermediate/CA level or ship multiple pins (current and upcoming) rather than a single leaf certificate.
 
-**Q: How would you explain Security In React Native to a junior developer?**  
-A: Start with the problem, show the smallest working example, explain what each part does, then discuss where the approach breaks down or needs extra care.
+**Q: How reliable is jailbreak/root detection, and how should it factor into a security design?**
+A: It's a useful heuristic signal — checking for unusual file paths, sideloaded packages, sandbox-escape capability, or debugger attachment — but it's not a guarantee, because the detection logic itself runs on the compromised device and can be intercepted or spoofed using hooking frameworks like Frida or Xposed by a motivated attacker. It belongs in a defense-in-depth strategy (stepping up authentication, limiting what sensitive data gets cached locally, flagging for fraud review) rather than being the sole gate on a sensitive action — the actual authorization decision for anything that matters needs to be enforced independently on the server.
 
-**Q: What follow-up topics connect to Security In React Native?**  
-A: Related topics usually include fundamentals, performance, debugging, security, and deployment concerns in the same stack. Interviewers often use those follow-ups to check whether your knowledge is connected or memorized.
+**Q: A teammate wants to embed a third-party service's API key directly in the React Native app so the app can call that service directly. What would you tell them?**
+A: I'd point out that anything shipped in the app bundle — whether plain JS or Hermes bytecode — is extractable by anyone with the app binary, so that key should be treated as effectively public the moment it ships, regardless of minification or obfuscation. If the key grants real privileges (billing, elevated data access, rate limits tied to your account), the safer pattern is to proxy that call through your own backend, which holds the real key server-side and can apply its own auth/rate-limiting to the app's requests instead of trusting the client with the credential directly.
 
 ## Related Topics
-
-- [accessibility.md](./accessibility.md)
+- [async-storage.md](./async-storage.md)
+- [networking-and-api-calls.md](./networking-and-api-calls.md)
+- [hermes-engine.md](./hermes-engine.md)
+- [app-permissions.md](./app-permissions.md)
+- [building-and-release.md](./building-and-release.md)
+- [../React/error-boundaries.md](../React/error-boundaries.md)

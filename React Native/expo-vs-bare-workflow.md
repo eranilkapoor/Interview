@@ -84,6 +84,6 @@ A: Prebuild (continuous native generation) replaced eject. Eject used to be a on
 ## Related Topics
 - [introduction-to-react-native.md](./introduction-to-react-native.md)
 - [native-modules.md](./native-modules.md)
-- [building-and-releasing-apps.md](./building-and-releasing-apps.md)
-- [permissions-handling.md](./permissions-handling.md)
+- [building-and-release.md](./building-and-release.md)
+- [app-permissions.md](./app-permissions.md)
 - [push-notifications.md](./push-notifications.md)

@@ -1,63 +1,98 @@
-﻿# Event Loop
+# Event Loop
 
-Event Loop belongs to the Node skill set. In interviews, it is useful because it shows whether you can connect theory with the way real systems are built, tested, deployed, and maintained.
+Node.js runs JavaScript on a single thread, but it achieves concurrency for I/O through the event loop, a mechanism implemented by libuv (the C library Node is built on). The event loop is not a single queue — it's a loop that cycles through a fixed sequence of phases, each with its own FIFO queue of callbacks. On every iteration ("tick" of the loop), Node processes all callbacks ready in the current phase, then moves to the next phase, and so on, looping indefinitely until there's no more work and no active handles keeping the process alive.
 
-The right mental model is: Node.js runtime behavior, event-loop scheduling, core modules, streams, networking, security, and production service design. A strong answer should explain the core idea, the normal workflow, the tradeoffs, and the failure modes. Avoid memorized one-line definitions; interviewers usually follow up by asking how you used the concept in a project or how you would debug it under pressure.
+The phases, in order, are: **timers** (runs callbacks scheduled by `setTimeout`/`setInterval` whose threshold has elapsed), **pending callbacks** (executes I/O callbacks deferred to the next loop iteration, e.g. certain TCP errors), **idle/prepare** (internal use only), **poll** (retrieves new I/O events, executes I/O-related callbacks such as `fs.readFile` completions; this phase can block here waiting for new events if nothing else is scheduled), **check** (runs `setImmediate` callbacks, which are specifically designed to run right after the poll phase), and **close callbacks** (e.g. `socket.on('close', ...)`). After close callbacks, the loop checks whether any timers, immediates, or pending I/O remain; if not, and there's nothing else keeping the event loop "alive" (no active handles/requests), the process exits.
 
-For teaching, begin with the problem, then show the smallest practical example, then discuss what changes at production scale. That makes the topic easier to remember and easier to adapt when the interviewer changes the constraints.
+Between every single callback — not just between phases — Node drains two additional queues: the `process.nextTick()` queue and the Promise microtask queue. These are not phases of the event loop itself; they are checked after each callback completes, anywhere in the loop. `process.nextTick()` callbacks run before Promise microtasks, and both fully drain (including any nextTick/microtasks queued by earlier ones in the same drain) before the loop proceeds to the next phase or callback. This is why `process.nextTick` can, if used recursively, starve the event loop entirely — I/O never gets a chance to run.
+
+CPU-bound and blocking synchronous work (like `fs.readFileSync`, a tight computational loop, or `JSON.parse` on huge payloads) runs directly on this single thread and blocks the entire event loop — no other timers, I/O callbacks, or microtasks can run until it finishes. This is fundamentally different from the browser's event loop: browsers don't have the same explicit phase structure (timers, poll, check, etc.) or a libuv thread pool backing filesystem/DNS/crypto operations — Node's poll phase and its thread pool (default size 4, configurable via `UV_THREADPOOL_SIZE`) are what let ostensibly "async" filesystem and crypto APIs run off the main thread without needing OS-level async I/O support for every syscall type.
 
 ## Examples
 
-~~~js
-import { createServer } from 'node:http';
-createServer((req, res) => res.end('Event Loop')).listen(3000);
-~~~
+```js
+// Demonstrates ordering: sync code, then nextTick/microtasks, then macrotask phases
+console.log('start');
 
-This example gives a practical anchor for the topic so you can explain the workflow rather than only naming the concept.
+setTimeout(() => console.log('timeout (timers phase)'), 0);
+setImmediate(() => console.log('immediate (check phase)'));
 
-~~~js
-import { pipeline } from 'node:stream/promises';
-// Use backpressure-aware APIs for large data instead of buffering everything in memory.
-~~~
+process.nextTick(() => console.log('nextTick'));
+Promise.resolve().then(() => console.log('promise microtask'));
 
-This example highlights how Event Loop connects to real project decisions: configuration, safety, performance, or maintainability.
+console.log('end');
 
-~~~bash
-# Interview checklist for Event Loop
-echo "Problem solved"
-echo "Main mechanism"
-echo "Tradeoffs"
-echo "Debugging and production concerns"
-~~~
+// Output order:
+// start
+// end
+// nextTick
+// promise microtask
+// timeout (timers phase)   <- or immediate first, order of these two is nondeterministic at top level
+// immediate (check phase)
+```
 
-Use this checklist when answering follow-up questions. It keeps the answer structured and prevents you from missing operational details.
+```js
+// setTimeout vs setImmediate inside an I/O callback: deterministic order
+const fs = require('node:fs');
+
+fs.readFile(__filename, () => {
+  // We are now inside the poll phase's callback.
+  setTimeout(() => console.log('timeout'), 0);
+  setImmediate(() => console.log('immediate'));
+  // Inside an I/O callback, check always runs before timers on the next
+  // iteration, so 'immediate' is guaranteed to log before 'timeout'.
+});
+```
+
+```js
+// A recursive process.nextTick call starves the event loop -- I/O never runs
+const fs = require('node:fs');
+
+fs.readFile(__filename, () => console.log('this file read callback is delayed'));
+
+let count = 0;
+function starve() {
+  if (count++ < 5) {
+    process.nextTick(starve); // keeps draining the nextTick queue before any phase advances
+  } else {
+    console.log('nextTick queue finally drained, I/O can now proceed');
+  }
+}
+starve();
+```
 
 ## Common Pitfalls / Gotchas
 
-- Blocking the event loop with CPU-heavy work or synchronous filesystem calls.
-- Ignoring backpressure when using streams.
-- Treating process-level errors as normal request errors.
-- Trusting user input in filesystem, crypto, URL, or child-process APIs.
+- Assuming `setTimeout(fn, 0)` and `setImmediate(fn)` have a fixed relative order — at the top level (outside any I/O callback) their order is not guaranteed and depends on process startup timing; only inside an I/O callback is `setImmediate` guaranteed to fire first.
+- Recursive `process.nextTick()` calls can starve the event loop entirely, since the nextTick queue must fully drain before the loop can proceed to any phase, including I/O.
+- Blocking the thread with synchronous APIs (`fs.readFileSync`, `crypto.pbkdf2Sync`, large `JSON.parse`/`JSON.stringify`, tight loops) freezes the entire loop — no timers, I/O, or microtasks run until it returns.
+- Forgetting that `poll` phase can block waiting for I/O if there are no timers or immediates scheduled — this is normal and expected, not a bug.
+- Confusing the "event loop" with a queue — it's a sequence of distinct phases each with its own callback queue, not one global FIFO.
+- Assuming the browser and Node event loops behave identically — Node has explicit phases (timers, poll, check, etc.) and a libuv thread pool for filesystem/DNS/some crypto; browsers rely on the rendering pipeline and different underlying primitives.
+- Not accounting for `process.nextTick` running before Promise microtasks — code that assumes strict Promise-then ordering can be surprised when nextTick callbacks jump the queue.
 
 ## Interview Questions & Answers
 
-**Q: What is Event Loop in the context of Node?**  
-A: It is a Node topic that helps solve problems around Node.js runtime behavior, event-loop scheduling, core modules, streams, networking, security, and production service design. The best answer explains the problem first, then the mechanism, then a real example.
+**Q: List the phases of the Node.js event loop in order.**
+A: timers → pending callbacks → idle/prepare (internal) → poll → check → close callbacks. Microtasks (`process.nextTick` then Promise callbacks) are drained after every individual callback, not just between phases.
 
-**Q: When would you use Event Loop in a production project?**  
-A: Use it when the project requirement matches the problem it solves and the tradeoffs are acceptable. Also explain how you would test, monitor, secure, or roll back the implementation.
+**Q: What's the difference between `process.nextTick()` and `Promise.prototype.then()` in terms of scheduling?**
+A: Both are microtasks that run before the event loop proceeds to its next phase, but Node maintains them as separate queues, and the `nextTick` queue is always fully drained first, before the Promise microtask queue is processed — on every single drain point, not just once per loop iteration.
 
-**Q: What should you compare Event Loop with?**  
-A: Compare it with simpler alternatives in the same stack. Mention complexity, performance, team familiarity, deployment impact, and long-term maintenance.
+**Q: Why can `fs.readFileSync` be dangerous in a Node HTTP server handling many concurrent requests?**
+A: Because Node is single-threaded for JS execution, a synchronous call blocks that thread completely until it finishes. Every other pending request, timer, and callback has to wait — throughput collapses under load, and it can effectively cause a denial-of-service if the file or workload is large.
 
-**Q: How would you debug an issue related to Event Loop?**  
-A: Start by reproducing the issue, checking configuration and logs, isolating the smallest failing case, and validating assumptions with tooling specific to Node.
+**Q: How does Node achieve non-blocking I/O if JavaScript itself runs on one thread?**
+A: Node delegates I/O work to the OS's async facilities where available (e.g., epoll/kqueue for sockets) or to libuv's internal thread pool (default 4 threads) for things like filesystem operations and some DNS/crypto calls. The JS thread just registers a callback and continues; libuv notifies the event loop's poll phase when the operation completes, and the callback is scheduled to run on the JS thread at that point.
 
-**Q: What is a senior-level point to mention?**  
-A: Senior answers include ownership, observability, failure recovery, security boundaries, cost or resource usage, and how the decision affects other teams.
+**Q: What would you check first if a Node server seems to be experiencing event loop lag under load?**
+A: Look for synchronous blocking calls in hot paths (sync fs/crypto, big JSON operations, heavy CPU loops, sorting large arrays), check for recursive `process.nextTick` usage, and consider tools like `--prof`, `clinic.js`, or the `perf_hooks` `monitorEventLoopDelay` API to measure actual lag; offload genuinely CPU-bound work to `worker_threads` or a `child_process`.
 
 ## Related Topics
 
 - [blocking.md](./blocking.md)
-- [buffers.md](./buffers.md)
-- [child-process.md](./child-process.md)
+- [non-blocking.md](./non-blocking.md)
+- [timers.md](./timers.md)
+- [streams.md](./streams.md)
+- [worker_threads.md](./worker_threads.md)
+- [process-and-os.md](./process-and-os.md)

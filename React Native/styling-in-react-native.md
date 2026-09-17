@@ -120,6 +120,6 @@ A: Density-independent pixels — RN accounts for the device's actual pixel dens
 - [flexbox-layout-in-react-native.md](./flexbox-layout-in-react-native.md)
 - [core-components.md](./core-components.md)
 - [responsive-design-and-screen-sizes.md](./responsive-design-and-screen-sizes.md)
-- [performance-optimization.md](./performance-optimization.md)
+- [performance-optimization-in-react-native.md](./performance-optimization-in-react-native.md)
 - [platform-specific-code.md](./platform-specific-code.md)
 - [../React/adding-styles-in-react.md](../React/adding-styles-in-react.md)

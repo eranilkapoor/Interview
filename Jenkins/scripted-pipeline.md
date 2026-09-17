@@ -1,61 +1,100 @@
-﻿# Scripted Pipeline
+# Scripted Pipeline
 
-Scripted Pipeline belongs to the Jenkins skill set. In interviews, it is useful because it shows whether you can connect theory with the way real systems are built, tested, deployed, and maintained.
+Scripted Pipeline is Jenkins's original pipeline-as-code syntax, predating declarative pipeline. It is written as arbitrary Groovy code inside a top-level `node { }` block, giving full access to Groovy's control flow — `if`/`else`, `for`/`while` loops, `try`/`catch`, custom functions and classes — directly in the pipeline body, with no restrictions on structure. Stages are still expressed with a `stage('name') { ... }` block for UI visualization purposes, but nothing about the file's shape is validated or constrained the way declarative pipelines are.
 
-The right mental model is: CI/CD pipelines, Jenkinsfiles, agents, credentials, stages, artifacts, approvals, and deployment automation. A strong answer should explain the core idea, the normal workflow, the tradeoffs, and the failure modes. Avoid memorized one-line definitions; interviewers usually follow up by asking how you used the concept in a project or how you would debug it under pressure.
+This flexibility is exactly what makes scripted pipeline both powerful and harder to maintain: because it's just Groovy, there's no upfront structural validation, error messages can be less clear, and two scripted pipelines can look completely different from each other in ways that make a team's pipelines inconsistent and harder to review at a glance. Declarative pipeline was introduced specifically to constrain that flexibility into a predictable, validated shape for the common case, while still allowing scripted-style code inside a `script { }` block when genuinely needed.
 
-For teaching, begin with the problem, then show the smallest practical example, then discuss what changes at production scale. That makes the topic easier to remember and easier to adapt when the interviewer changes the constraints.
+Scripted pipeline remains fully supported and is not deprecated — it's the right tool when a pipeline's logic is inherently dynamic or complex enough that declarative's fixed grammar would require an unreasonable number of `script { }` escape hatches to express. Shared Library implementations, in particular, are frequently written in scripted style even when the Jenkinsfiles that call them are declarative, since library code is Groovy regardless.
+
+Understanding scripted pipeline is also what makes the declarative `script { }` step make sense: that step is literally scripted-pipeline semantics dropped inline into a declarative pipeline, executing as regular Groovy with full access to the same steps (`sh`, `checkout`, etc.) available anywhere else.
 
 ## Examples
 
-~~~groovy
-pipeline { agent any; stages { stage('Test') { steps { sh 'npm test' } } } }
-~~~
+A basic scripted pipeline, structurally equivalent to a simple declarative build/test/deploy pipeline:
 
-This example gives a practical anchor for the topic so you can explain the workflow rather than only naming the concept.
+```groovy
+node {
+    stage('Build') {
+        sh 'npm install'
+    }
+    stage('Test') {
+        sh 'npm test'
+    }
+    stage('Deploy') {
+        sh './deploy.sh'
+    }
+}
+```
 
-~~~groovy
-withCredentials([string(credentialsId: 'token', variable: 'TOKEN')]) { sh 'deploy.sh' }
-~~~
+Using genuine Groovy control flow — a `for` loop and conditional — that would require a `script { }` escape hatch in declarative syntax:
 
-This example highlights how Scripted Pipeline connects to real project decisions: configuration, safety, performance, or maintainability.
+```groovy
+node {
+    def environments = ['staging', 'qa', 'prod']
 
-~~~bash
-# Interview checklist for Scripted Pipeline
-echo "Problem solved"
-echo "Main mechanism"
-echo "Tradeoffs"
-echo "Debugging and production concerns"
-~~~
+    for (env in environments) {
+        stage("Deploy to ${env}") {
+            if (env == 'prod') {
+                input message: "Approve deploy to ${env}?"
+            }
+            sh "./deploy.sh ${env}"
+        }
+    }
+}
+```
 
-Use this checklist when answering follow-up questions. It keeps the answer structured and prevents you from missing operational details.
+Wrapping build steps in `try`/`catch`/`finally` for custom error handling and guaranteed cleanup — native Groovy exception handling:
+
+```groovy
+node {
+    try {
+        stage('Build') {
+            sh 'make build'
+        }
+        stage('Test') {
+            sh 'make test'
+        }
+    } catch (err) {
+        currentBuild.result = 'FAILURE'
+        echo "Pipeline failed: ${err}"
+        throw err
+    } finally {
+        stage('Cleanup') {
+            sh 'make clean'
+            junit 'reports/*.xml'
+        }
+    }
+}
+```
 
 ## Common Pitfalls / Gotchas
 
-- Hardcoding secrets in Jenkinsfiles or console output.
-- Letting builds depend on mutable agent state instead of reproducible setup.
-- Skipping post-build cleanup, artifact retention, or notifications.
-- Mixing CI validation and production deployment without approvals or rollback strategy.
+- Assuming scripted pipeline is deprecated or "the old way to avoid" — it's fully supported and is the correct choice for genuinely dynamic pipeline logic; declarative's `script { }` step is itself scripted pipeline running inline.
+- Writing inconsistent, ad-hoc structure across a team's scripted pipelines since nothing enforces a shape — leads to pipelines that are hard to review because every one is organized differently.
+- Forgetting that stages in scripted pipeline are not validated the way declarative stages are — a typo in a stage name or a missing `stage()` wrapper around some steps doesn't produce a clear validation error, just an incorrect-looking pipeline graph.
+- Not handling exceptions explicitly — an unhandled error inside `node { }` fails the whole build, but without `try`/`catch`/`finally`, there's no guaranteed cleanup step (declarative's `post { always { } }` has no direct scripted equivalent unless you write the `try/finally` yourself).
+- Overusing scripted pipeline for logic that declarative's `when`/`parameters`/`environment` directives could express more clearly and safely.
 
 ## Interview Questions & Answers
 
-**Q: What is Scripted Pipeline in the context of Jenkins?**  
-A: It is a Jenkins topic that helps solve problems around CI/CD pipelines, Jenkinsfiles, agents, credentials, stages, artifacts, approvals, and deployment automation. The best answer explains the problem first, then the mechanism, then a real example.
+**Q: What is scripted pipeline, and how does it differ structurally from declarative?**
+A: Scripted pipeline is arbitrary Groovy code inside a `node { }` block with `stage()` calls for visualization, with no fixed grammar or upfront validation. Declarative wraps pipelines in a fixed, validated `pipeline { }` structure with defined sections (`agent`, `stages`, `post`, etc.) and only allows raw Groovy inside an explicit `script { }` step.
 
-**Q: When would you use Scripted Pipeline in a production project?**  
-A: Use it when the project requirement matches the problem it solves and the tradeoffs are acceptable. Also explain how you would test, monitor, secure, or roll back the implementation.
+**Q: Is scripted pipeline deprecated? When would you actually choose it over declarative?**
+A: No, it's fully supported. You'd choose it (or use a `script { }` block within a declarative pipeline) when the pipeline's logic is genuinely dynamic — building stage lists from data, complex branching that `when` can't express cleanly, or custom Groovy classes/functions — situations where forcing declarative's fixed grammar would need excessive escape hatches.
 
-**Q: What should you compare Scripted Pipeline with?**  
-A: Compare it with simpler alternatives in the same stack. Mention complexity, performance, team familiarity, deployment impact, and long-term maintenance.
+**Q: How does error handling differ between scripted and declarative pipeline?**
+A: Scripted pipeline uses native Groovy `try`/`catch`/`finally` around stages, giving full control but requiring the author to write that structure explicitly for any cleanup guarantee. Declarative provides a built-in `post { }` section (`always`, `failure`, `success`, etc.) that runs automatically after all stages regardless of outcome, without needing manual `try`/`finally`.
 
-**Q: How would you debug an issue related to Scripted Pipeline?**  
-A: Start by reproducing the issue, checking configuration and logs, isolating the smallest failing case, and validating assumptions with tooling specific to Jenkins.
+**Q: What is the relationship between a declarative pipeline's `script { }` step and scripted pipeline?**
+A: They're the same thing — `script { }` is a declarative step that executes its contents as scripted-pipeline Groovy, with access to the same steps and full imperative control flow. It's the officially sanctioned way to drop into scripted semantics for a small piece of logic while keeping the rest of the pipeline declarative.
 
-**Q: What is a senior-level point to mention?**  
-A: Senior answers include ownership, observability, failure recovery, security boundaries, cost or resource usage, and how the decision affects other teams.
+**Q: Why might a team standardize on declarative pipeline even though scripted is more powerful?**
+A: Consistency and maintainability at scale — declarative's fixed structure means every pipeline in the org looks similar, gets the same upfront syntax validation, and renders correctly in Blue Ocean/stage view without special cases. The extra power of scripted is rarely needed for typical build/test/deploy flows, so most teams trade a small amount of flexibility for a large amount of predictability.
 
 ## Related Topics
 
-- [agents-and-executors.md](./agents-and-executors.md)
-- [blue-green-deployment.md](./blue-green-deployment.md)
-- [credentials-management.md](./credentials-management.md)
+- [declarative-pipeline.md](./declarative-pipeline.md)
+- [pipeline.md](./pipeline.md)
+- [jenkinsfile.md](./jenkinsfile.md)
+- [pipeline-troubleshooting.md](./pipeline-troubleshooting.md)
